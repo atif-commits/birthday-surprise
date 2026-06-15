@@ -11,8 +11,8 @@ st.set_page_config(
 )
 
 # ── CONFIG — change these ──────────────────────────────────────────────────────
-FRIEND_NAME  = "Subhan"
-CORRECT_PASS = "2106"
+FRIEND_NAME  = "motu bhai "
+CORRECT_PASS = "2307"
 SECRET_LETTER = """
 You've been one of the most genuine people I've ever met.
 The kind of person who shows up, who listens, who makes everything
