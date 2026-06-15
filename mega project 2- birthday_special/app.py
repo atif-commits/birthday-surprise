@@ -70,7 +70,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     background: linear-gradient(90deg, transparent, #C9A96E, transparent);
     border: none;
     margin: 2rem auto;
-    width: 60%;
+    width: 90%;
 }
 
 .pass-label {
