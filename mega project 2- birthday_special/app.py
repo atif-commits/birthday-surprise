@@ -132,13 +132,22 @@ div[data-testid="stAlert"] {
     letter-spacing: 0.08em;
     margin-bottom: 1.8rem;
 }
+.countdown-num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(6rem, 20vw, 10rem);
+    font-weight: 700;
+    color: #C9A96E;
+    text-align: center;
+    line-height: 1;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ── SESSION STATE ──────────────────────────────────────────────────────────────
-if "unlocked"      not in st.session_state: st.session_state.unlocked      = False
-if "show_letter"   not in st.session_state: st.session_state.show_letter   = False
-if "letter_opened" not in st.session_state: st.session_state.letter_opened = False
+if "unlocked"        not in st.session_state: st.session_state.unlocked        = False
+if "show_letter"     not in st.session_state: st.session_state.show_letter     = False
+if "letter_opened"   not in st.session_state: st.session_state.letter_opened   = False
+if "typed"           not in st.session_state: st.session_state.typed           = False
 
 # ══════════════════════════════════════════════════════════════════════════════
 # LOCKED PAGE
@@ -170,7 +179,7 @@ if not st.session_state.unlocked:
             countdown = st.empty()
             for i in range(3, 0, -1):
                 countdown.markdown(
-                    f"<h1 style='text-align:center; color:#C9A96E;'>{i}</h1>",
+                    f'<p class="countdown-num">{i}</p>',
                     unsafe_allow_html=True
                 )
                 time.sleep(1)
@@ -206,15 +215,23 @@ else:
             unsafe_allow_html=True,
         )
 
-    # ── typewriter headline ──
-    title_placeholder = st.empty()
+    # ── typewriter headline (only once, right after countdown) ──
     title_text = f"Happy Birthday, {FRIEND_NAME}! 🎂"
-    for i in range(len(title_text) + 1):
+    title_placeholder = st.empty()
+
+    if not st.session_state.typed:
+        for i in range(len(title_text) + 1):
+            title_placeholder.markdown(
+                f'<p class="bday-headline">{title_text[:i]}</p>',
+                unsafe_allow_html=True
+            )
+            time.sleep(0.05)
+        st.session_state.typed = True
+    else:
         title_placeholder.markdown(
-            f'<p class="bday-headline">{title_text[:i]}</p>',
+            f'<p class="bday-headline">{title_text}</p>',
             unsafe_allow_html=True
         )
-        time.sleep(0.03)
 
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
     st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
