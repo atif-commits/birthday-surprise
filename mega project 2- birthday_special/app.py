@@ -66,7 +66,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     background: linear-gradient(90deg, transparent, #C9A96E, transparent);
     border: none;
     margin: 2rem auto;
-    width: 90%;
+    width: 100%;
 }
 .pass-label {
     color: #7A6A55;
@@ -177,7 +177,7 @@ div[data-testid="stAlert"] {
     vertical-align: bottom;
     border-right: 0.08em solid #C9A96E;
     animation:
-        typing 1.6s steps(30, end) forwards,
+        typing 0.5s steps(30, end) forwards,
         blink-caret 0.75s step-end infinite;
 }
 .bday-headline.static-text {
