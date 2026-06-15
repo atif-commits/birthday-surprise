@@ -212,7 +212,7 @@ else:
         )
 
     # ── headline ──
-    st.markdown(f'<p class="bday-headline">Happy Birthday, {FRIEND_NAME}! 🎂</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="bday-headline">Happy Birthday, {FRIEND_NAME}! </p>', unsafe_allow_html=True)
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
     st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
 
