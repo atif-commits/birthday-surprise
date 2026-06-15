@@ -249,7 +249,10 @@ else:
             '💌 Just between us</p>',
             unsafe_allow_html=True,
         )
-
+        st.markdown(
+            f'<p class="letter-body">{SECRET_LETTER.strip()}</p>',
+            unsafe_allow_html=True,
+        )
        
 
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
