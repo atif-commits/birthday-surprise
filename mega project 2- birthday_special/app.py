@@ -117,14 +117,6 @@ div[data-testid="stAlert"] {
     white-space: pre-line;
     text-align: center;
 }
-.bday-headline {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
-    color: #2C2416;
-    text-align: center;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
-}
 .bday-sub {
     color: #7A6A55;
     text-align: center;
@@ -132,13 +124,71 @@ div[data-testid="stAlert"] {
     letter-spacing: 0.08em;
     margin-bottom: 1.8rem;
 }
+
+/* ── COUNTDOWN: full-screen overlay so it's always huge & centered ── */
+.countdown-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FAF7F2;
+    z-index: 9999;
+}
 .countdown-num {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(6rem, 20vw, 10rem);
+    font-size: 18rem;
     font-weight: 700;
     color: #C9A96E;
-    text-align: center;
     line-height: 1;
+}
+@media (max-width: 600px) {
+    .countdown-num { font-size: 9rem; }
+}
+
+/* ── TYPEWRITER (pure CSS, smooth & reliable) ── */
+@property --tw-width {
+    syntax: '<length>';
+    initial-value: 0ch;
+    inherits: false;
+}
+@keyframes typing {
+    from { --tw-width: 0ch; }
+    to   { --tw-width: var(--final-width); }
+}
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50%      { border-color: #C9A96E; }
+}
+.bday-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 700;
+    color: #2C2416;
+    text-align: center;
+    margin: 0 auto 0.2rem auto;
+}
+.bday-headline.typewriter {
+    display: inline-block;
+    width: var(--tw-width);
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    border-right: 0.08em solid #C9A96E;
+    animation:
+        typing 1.6s steps(30, end) forwards,
+        blink-caret 0.75s step-end infinite;
+}
+.bday-headline.static-text {
+    width: auto;
+    overflow: visible;
+    white-space: normal;
+    border-right: none;
+}
+.bday-headline-wrap {
+    text-align: center;
+    width: 100%;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -179,10 +229,10 @@ if not st.session_state.unlocked:
             countdown = st.empty()
             for i in range(3, 0, -1):
                 countdown.markdown(
-                    f'<p class="countdown-num">{i}</p>',
-                    unsafe_allow_html=True
+                    f'<div class="countdown-overlay"><span class="countdown-num">{i}</span></div>',
+                    unsafe_allow_html=True,
                 )
-                time.sleep(1)
+                time.sleep(0.8)
             countdown.empty()
             st.session_state.unlocked = True
             st.rerun()
@@ -215,22 +265,29 @@ else:
             unsafe_allow_html=True,
         )
 
-    # ── typewriter headline (only once, right after countdown) ──
+    # ── headline: CSS typewriter (smooth + reliable, plays once) ──
     title_text = f"Happy Birthday, {FRIEND_NAME}! 🎂"
-    title_placeholder = st.empty()
+    n_chars = len(title_text) + 2  # +2 buffer so emoji/wide glyphs don't clip
 
     if not st.session_state.typed:
-        for i in range(len(title_text) + 1):
-            title_placeholder.markdown(
-                f'<p class="bday-headline">{title_text[:i]}</p>',
-                unsafe_allow_html=True
-            )
-            time.sleep(0.05)
+        st.markdown(
+            f"""
+            <div class="bday-headline-wrap">
+                <style>.bday-headline.typewriter {{ --final-width: {n_chars}ch; }}</style>
+                <span class="bday-headline typewriter">{title_text}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         st.session_state.typed = True
     else:
-        title_placeholder.markdown(
-            f'<p class="bday-headline">{title_text}</p>',
-            unsafe_allow_html=True
+        st.markdown(
+            f"""
+            <div class="bday-headline-wrap">
+                <span class="bday-headline static-text">{title_text}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
@@ -278,5 +335,5 @@ else:
         st.markdown(
             '<p style="text-align:center; color:#7A6A55; font-size:0.9rem;">coded by atif with lots of love 🤍</p>',
             unsafe_allow_html=True,
-        
+
         )
