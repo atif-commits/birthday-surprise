@@ -1,17 +1,18 @@
 import streamlit as st
 import base64
 import os
+import time
 
 # ── MUST BE FIRST ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="A Gift For You 🎁",
-    page_icon="🎂",
+    page_icon="🎁",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
 
-# ── CONFIG — change these ──────────────────────────────────────────────────────
-FRIEND_NAME  = "motu bhai "
+# ── CONFIG ─────────────────────────────────────────────────────────────────────
+FRIEND_NAME  = "motu bhai"
 CORRECT_PASS = "2307"
 SECRET_LETTER = """
 You've been one of the most genuine people I've ever met.
@@ -21,7 +22,7 @@ feel a little lighter just by being there.
 This year I hope you get everything you deserve —
 which is honestly quite a lot.
 
-Happy Birthday. 
+Happy Birthday.
 """
 
 # ── GLOBAL STYLES ──────────────────────────────────────────────────────────────
@@ -30,9 +31,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@300;400;500&display=swap');
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-
 .stApp { background: #FAF7F2; min-height: 100vh; }
-
 #MainMenu, footer, header { visibility: hidden; }
 .block-container { padding-top: 3rem; padding-bottom: 4rem; max-width: 680px; }
 
@@ -46,7 +45,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin-bottom: 0.25rem;
     letter-spacing: -0.02em;
 }
-
 .display-sub {
     font-family: 'Playfair Display', serif;
     font-style: italic;
@@ -56,7 +54,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin-bottom: 2.5rem;
     letter-spacing: 0.02em;
 }
-
 .card {
     background: #F2EDE4;
     border: 1px solid #E0D5C5;
@@ -64,7 +61,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     padding: 2.2rem 2.4rem;
     margin-bottom: 1.5rem;
 }
-
 .gold-rule {
     height: 1px;
     background: linear-gradient(90deg, transparent, #C9A96E, transparent);
@@ -72,7 +68,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin: 2rem auto;
     width: 90%;
 }
-
 .pass-label {
     color: #7A6A55;
     font-size: 0.78rem;
@@ -81,7 +76,6 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     text-transform: uppercase;
     margin-bottom: 0.4rem;
 }
-
 div[data-baseweb="input"] {
     border-radius: 12px !important;
     border: 1px solid #E0D5C5 !important;
@@ -93,7 +87,6 @@ div[data-baseweb="input"] input {
     font-size: 1rem !important;
     letter-spacing: 0.08em !important;
 }
-
 .stButton > button {
     background: #C9A96E !important;
     color: #FAF7F2 !important;
@@ -109,14 +102,12 @@ div[data-baseweb="input"] input {
     margin-top: 0.8rem !important;
 }
 .stButton > button:hover { opacity: 0.82 !important; }
-
 div[data-testid="stAlert"] {
     border-radius: 12px !important;
     border: none !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.88rem !important;
 }
-
 .letter-body {
     font-family: 'Playfair Display', serif;
     font-style: italic;
@@ -126,7 +117,6 @@ div[data-testid="stAlert"] {
     white-space: pre-line;
     text-align: center;
 }
-
 .bday-headline {
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.8rem, 5vw, 2.6rem);
@@ -145,12 +135,10 @@ div[data-testid="stAlert"] {
 </style>
 """, unsafe_allow_html=True)
 
-
 # ── SESSION STATE ──────────────────────────────────────────────────────────────
 if "unlocked"      not in st.session_state: st.session_state.unlocked      = False
 if "show_letter"   not in st.session_state: st.session_state.show_letter   = False
 if "letter_opened" not in st.session_state: st.session_state.letter_opened = False
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # LOCKED PAGE
@@ -179,6 +167,14 @@ if not st.session_state.unlocked:
 
     if st.button("Open Your Gift →"):
         if password == CORRECT_PASS:
+            countdown = st.empty()
+            for i in range(3, 0, -1):
+                countdown.markdown(
+                    f"<h1 style='text-align:center; color:#C9A96E;'>{i}</h1>",
+                    unsafe_allow_html=True
+                )
+                time.sleep(1)
+            countdown.empty()
             st.session_state.unlocked = True
             st.rerun()
         elif password == "":
@@ -187,7 +183,6 @@ if not st.session_state.unlocked:
             st.error("That's not it. Try again. 🔐")
 
     st.markdown('</div>', unsafe_allow_html=True)
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # UNLOCKED PAGE
@@ -211,8 +206,16 @@ else:
             unsafe_allow_html=True,
         )
 
-    # ── headline ──
-    st.markdown(f'<p class="bday-headline">Happy Birthday, {FRIEND_NAME}! 🎂 </p>', unsafe_allow_html=True)
+    # ── typewriter headline ──
+    title_placeholder = st.empty()
+    title_text = f"Happy Birthday, {FRIEND_NAME}! 🎂"
+    for i in range(len(title_text) + 1):
+        title_placeholder.markdown(
+            f'<p class="bday-headline">{title_text[:i]}</p>',
+            unsafe_allow_html=True
+        )
+        time.sleep(0.05)
+
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
     st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
 
@@ -253,10 +256,9 @@ else:
             f'<p class="letter-body">{SECRET_LETTER.strip()}</p>',
             unsafe_allow_html=True,
         )
-       
 
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
         st.markdown(
-            '<p style="text-align:center; color:#7A6A55; font-size:1 rem;">coded by atif with lots of love 🤍</p>',
+            '<p style="text-align:center; color:#7A6A55; font-size:0.9rem;">coded by atif with lots of love 🤍</p>',
             unsafe_allow_html=True,
         )
