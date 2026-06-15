@@ -250,13 +250,10 @@ else:
             unsafe_allow_html=True,
         )
 
-        st.markdown(
-            f'<p class="letter-body">{SECRET_LETTER.strip()}</p>',
-            unsafe_allow_html=True,
-        )
+       
 
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
         st.markdown(
-            '<p style="text-align:center; color:#7A6A55; font-size:0.8rem;">Made with love 🤍</p>',
+            '<p style="text-align:center; color:#7A6A55; font-size:1 rem;">coded by atif with lots of love 🤍</p>',
             unsafe_allow_html=True,
         )
