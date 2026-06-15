@@ -278,4 +278,5 @@ else:
         st.markdown(
             '<p style="text-align:center; color:#7A6A55; font-size:0.9rem;">coded by atif with lots of love 🤍</p>',
             unsafe_allow_html=True,
+        
         )
