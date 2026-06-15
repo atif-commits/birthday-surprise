@@ -214,7 +214,7 @@ else:
             f'<p class="bday-headline">{title_text[:i]}</p>',
             unsafe_allow_html=True
         )
-        time.sleep(0.05)
+        time.sleep(0.03)
 
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
     st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
