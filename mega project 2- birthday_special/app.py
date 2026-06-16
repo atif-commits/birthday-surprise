@@ -238,39 +238,52 @@ if not st.session_state.unlocked:
 # UNLOCKED PAGE
 # ══════════════════════════════════════════════════════════════════════════════
 else:
-    # ── music: inject the <audio> tag exactly once ──
-    # Root cause of double-playback: this whole block previously ran on
-    # *every* rerun after unlocking (e.g. clicking "Open the Secret Letter"
-    # triggers a rerun too). Each rerun created a brand-new <audio autoplay>
-    # element in a brand-new components.html iframe, and the old iframe
-    # wasn't always torn down before the new one started playing — so for
-    # a moment two copies played at once. Gating this behind its own
-    # one-shot session_state flag (same pattern as `typed` below) means the
-    # tag is written to the DOM a single time; once it exists, the browser
-    # owns it and keeps looping it on its own with no further Python
-    # involvement, so later reruns can't spawn a duplicate.
-    if "music_started" not in st.session_state:
-        st.session_state.music_started = False
-
+    # ── music: always re-render the tag, but make playback idempotent ──
+    # Why the earlier "inject once" fix broke playback: gating the whole
+    # st.markdown call behind `music_started` stops it from running again
+    # on later reruns (e.g. the "Open the Secret Letter" click) — which
+    # also means the <audio> element's HTML is simply never written into
+    # the new page at all, since Streamlit rebuilds the DOM from scratch
+    # on every rerun by replaying whichever st.markdown/components calls
+    # actually execute. Skipped call -> no element in the new DOM -> sound
+    # cuts out, which is exactly what happened.
+    #
+    # The correct fix: keep emitting the tag every single rerun (so it's
+    # always present), but move the "only once" logic into the JS itself.
+    # The script checks the *parent* document (where components.html
+    # content gets cloned to) for an existing #bday-audio element before
+    # doing anything. If one's already there and already playing, it does
+    # nothing — no second element, no restart, no interruption. If one
+    # isn't there yet (first render), it creates it and calls .play() once.
     BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
     audio_path = os.path.join(BASE_DIR, "birthday.mp3")
 
-    if not st.session_state.music_started and os.path.exists(audio_path):
+    if os.path.exists(audio_path):
         with open(audio_path, "rb") as f:
             audio_base64 = base64.b64encode(f.read()).decode()
-        st.markdown(
+        components.html(
             f"""
-            <audio id="bday-audio" autoplay loop style="display:none;">
-                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-            </audio>
             <script>
-                var a = document.getElementById('bday-audio');
-                if (a) {{ a.play().catch(function() {{ /* autoplay blocked, ignore */ }}); }}
+                (function () {{
+                    var doc = window.parent.document;
+                    var existing = doc.getElementById('bday-audio');
+                    if (existing) {{
+                        // Already created on an earlier rerun and still
+                        // looping — leave it completely alone.
+                        return;
+                    }}
+                    var audio = doc.createElement('audio');
+                    audio.id = 'bday-audio';
+                    audio.loop = true;
+                    audio.style.display = 'none';
+                    audio.src = 'data:audio/mp3;base64,{audio_base64}';
+                    doc.body.appendChild(audio);
+                    audio.play().catch(function () {{ /* autoplay blocked, ignore */ }});
+                }})();
             </script>
             """,
-            unsafe_allow_html=True,
+            height=0,
         )
-        st.session_state.music_started = True
 
     st.balloons()
 
