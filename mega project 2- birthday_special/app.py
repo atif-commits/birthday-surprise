@@ -194,7 +194,7 @@ if not st.session_state.unlocked:
                  display:flex; align-items:center; justify-content:center;
                  background:#FAF7F2; font-family:'Playfair Display', serif;
                  font-weight:700; color:#C9A96E; font-size:min(45vw, 22rem);
-                 line-height:1; transition:opacity 0.25s ease;">3</div>
+                 line-height:1;">3</div>
             <script>
                 (function () {
                     var doc = window.parent.document;
@@ -203,8 +203,7 @@ if not st.session_state.unlocked:
 
                     var host = doc.createElement('div');
                     host.id = 'cd-overlay-host';
-                    var src = document.getElementById('cd-root');
-                    host.appendChild(src.cloneNode(true));
+                    host.appendChild(document.getElementById('cd-root').cloneNode(true));
                     doc.body.appendChild(host);
 
                     var el = doc.getElementById('cd-root');
@@ -214,16 +213,20 @@ if not st.session_state.unlocked:
                         if (n > 0) {
                             el.textContent = n;
                         } else {
-                            el.style.opacity = '0';
-                            setTimeout(function () { host.remove(); }, 250);
                             clearInterval(iv);
+                            host.remove();
                         }
-                    }, 700);
+                    }, 450);
                 })();
             </script>
             """
             components.html(countdown_html, height=0)
-            time.sleep(2.4)  # 3 ticks * 0.7s + fade buffer, matches JS timing above
+            # 3 ticks * 0.45s = 1.35s total — matches the JS interval above
+            # exactly, so the page swap lands right as "1" disappears.
+            # Shortened from the original 0.7s/tick (2.4s total) since that
+            # felt sluggish; this is the only sleep in the whole app and it
+            # exists purely to keep this rerun from firing mid-animation.
+            time.sleep(1.35)
             st.session_state.unlocked = True
             st.rerun()
         else:
@@ -235,17 +238,24 @@ if not st.session_state.unlocked:
 # UNLOCKED PAGE
 # ══════════════════════════════════════════════════════════════════════════════
 else:
-    # ── music: user-gesture autoplay fallback ──
-    # Browsers block <audio autoplay> without a prior user interaction. The
-    # password submit just above IS that interaction, but the new page render
-    # happens after a rerun, so some browsers still block it. The hidden
-    # "Open Your Gift" click already counts as a gesture for most browsers;
-    # this script also tries .play() directly and silently no-ops if blocked
-    # rather than leaving a broken/noisy player.
+    # ── music: inject the <audio> tag exactly once ──
+    # Root cause of double-playback: this whole block previously ran on
+    # *every* rerun after unlocking (e.g. clicking "Open the Secret Letter"
+    # triggers a rerun too). Each rerun created a brand-new <audio autoplay>
+    # element in a brand-new components.html iframe, and the old iframe
+    # wasn't always torn down before the new one started playing — so for
+    # a moment two copies played at once. Gating this behind its own
+    # one-shot session_state flag (same pattern as `typed` below) means the
+    # tag is written to the DOM a single time; once it exists, the browser
+    # owns it and keeps looping it on its own with no further Python
+    # involvement, so later reruns can't spawn a duplicate.
+    if "music_started" not in st.session_state:
+        st.session_state.music_started = False
+
     BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
     audio_path = os.path.join(BASE_DIR, "birthday.mp3")
 
-    if os.path.exists(audio_path):
+    if not st.session_state.music_started and os.path.exists(audio_path):
         with open(audio_path, "rb") as f:
             audio_base64 = base64.b64encode(f.read()).decode()
         st.markdown(
@@ -260,6 +270,7 @@ else:
             """,
             unsafe_allow_html=True,
         )
+        st.session_state.music_started = True
 
     st.balloons()
 
