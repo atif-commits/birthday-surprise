@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import base64
 import os
 import time
@@ -60,13 +61,14 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     border-radius: 20px;
     padding: 2.2rem 2.4rem;
     margin-bottom: 1.5rem;
+    animation: fade-in-up 0.7s ease-out both;
 }
 .gold-rule {
     height: 1px;
     background: linear-gradient(90deg, transparent, #C9A96E, transparent);
     border: none;
-    margin: 4rem auto;
-    width: 100%;
+    margin: 2.5rem auto;
+    width: 90%;
 }
 .pass-label {
     color: #7A6A55;
@@ -80,6 +82,10 @@ div[data-baseweb="input"] {
     border-radius: 12px !important;
     border: 1px solid #E0D5C5 !important;
     background: #FAF7F2 !important;
+    transition: border-color 0.2s !important;
+}
+div[data-baseweb="input"]:focus-within {
+    border-color: #C9A96E !important;
 }
 div[data-baseweb="input"] input {
     color: #7A6A55 !important;
@@ -98,10 +104,11 @@ div[data-baseweb="input"] input {
     border-radius: 50px !important;
     padding: 0.6rem 2rem !important;
     width: 100% !important;
-    transition: opacity 0.2s !important;
+    transition: opacity 0.2s, transform 0.2s !important;
     margin-top: 0.8rem !important;
 }
-.stButton > button:hover { opacity: 0.82 !important; }
+.stButton > button:hover  { opacity: 0.85 !important; transform: translateY(-1px) !important; }
+.stButton > button:active { transform: translateY(0) !important; }
 div[data-testid="stAlert"] {
     border-radius: 12px !important;
     border: none !important;
@@ -117,6 +124,14 @@ div[data-testid="stAlert"] {
     white-space: pre-line;
     text-align: center;
 }
+.bday-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 700;
+    color: #2C2416;
+    text-align: center;
+    margin-bottom: 0.2rem;
+}
 .bday-sub {
     color: #7A6A55;
     text-align: center;
@@ -124,80 +139,24 @@ div[data-testid="stAlert"] {
     letter-spacing: 0.08em;
     margin-bottom: 1.8rem;
 }
-
-/* ── COUNTDOWN: full-screen overlay so it's always huge & centered ── */
-.countdown-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #FAF7F2;
-    z-index: 9999;
-}
-.countdown-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 18rem;
-    font-weight: 700;
-    color: #C9A96E;
-    line-height: 1;
-}
-@media (max-width: 600px) {
-    .countdown-num { font-size: 9rem; }
+.signoff {
+    text-align: center;
+    color: #A8997F;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
 }
 
-/* ── TYPEWRITER (pure CSS, smooth & reliable) ── */
-@property --tw-width {
-    syntax: '<length>';
-    initial-value: 0ch;
-    inherits: false;
-}
-@keyframes typing {
-    from { --tw-width: 0ch; }
-    to   { --tw-width: var(--final-width); }
-}
-@keyframes blink-caret {
-    from, to { border-color: transparent; }
-    50%      { border-color: #C9A96E; }
-}
-.bday-headline {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
-    font-weight: 700;
-    color: #2C2416;
-    text-align: center;
-    margin: 0 auto 0.2rem auto;
-}
-.bday-headline.typewriter {
-    display: inline-block;
-    width: var(--tw-width);
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    vertical-align: bottom;
-    border-right: 0.08em solid #C9A96E;
-    animation:
-        typing 0.5s steps(30, end) forwards,
-        blink-caret 0.75s step-end infinite;
-}
-.bday-headline.static-text {
-    width: auto;
-    overflow: visible;
-    white-space: normal;
-    border-right: none;
-}
-.bday-headline-wrap {
-    text-align: center;
-    width: 100%;
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ── SESSION STATE ──────────────────────────────────────────────────────────────
-if "unlocked"        not in st.session_state: st.session_state.unlocked        = False
-if "show_letter"     not in st.session_state: st.session_state.show_letter     = False
-if "letter_opened"   not in st.session_state: st.session_state.letter_opened   = False
-if "typed"           not in st.session_state: st.session_state.typed           = False
+if "unlocked"      not in st.session_state: st.session_state.unlocked      = False
+if "letter_opened" not in st.session_state: st.session_state.letter_opened = False
+if "typed"         not in st.session_state: st.session_state.typed         = False
 
 # ══════════════════════════════════════════════════════════════════════════════
 # LOCKED PAGE
@@ -217,27 +176,56 @@ if not st.session_state.unlocked:
 
     st.markdown('<p class="pass-label">🔒 Secret Password</p>', unsafe_allow_html=True)
 
-    password = st.text_input(
-        label="password",
-        type="password",
-        placeholder="enter the password...",
-        label_visibility="collapsed",
-    )
+    with st.form("unlock_form", clear_on_submit=False):
+        password = st.text_input(
+            label="password",
+            type="password",
+            placeholder="enter the password...",
+            label_visibility="collapsed",
+        )
+        submitted = st.form_submit_button("Open Your Gift →")
 
-    if st.button("Open Your Gift →"):
-        if password == CORRECT_PASS:
-            countdown = st.empty()
-            for i in range(3, 0, -1):
-                countdown.markdown(
-                    f'<div class="countdown-overlay"><span class="countdown-num">{i}</span></div>',
-                    unsafe_allow_html=True,
-                )
-                time.sleep(0.8)
-            countdown.empty()
+    if submitted:
+        if password == "":
+            st.warning("Enter a password first.")
+        elif password == CORRECT_PASS:
+            countdown_html = """
+            <div id="cd-root" style="position:fixed; inset:0; z-index:999999;
+                 display:flex; align-items:center; justify-content:center;
+                 background:#FAF7F2; font-family:'Playfair Display', serif;
+                 font-weight:700; color:#C9A96E; font-size:min(45vw, 22rem);
+                 line-height:1; transition:opacity 0.25s ease;">3</div>
+            <script>
+                (function () {
+                    var doc = window.parent.document;
+                    var old = doc.getElementById('cd-overlay-host');
+                    if (old) old.remove();
+
+                    var host = doc.createElement('div');
+                    host.id = 'cd-overlay-host';
+                    var src = document.getElementById('cd-root');
+                    host.appendChild(src.cloneNode(true));
+                    doc.body.appendChild(host);
+
+                    var el = doc.getElementById('cd-root');
+                    var n = 3;
+                    var iv = setInterval(function () {
+                        n -= 1;
+                        if (n > 0) {
+                            el.textContent = n;
+                        } else {
+                            el.style.opacity = '0';
+                            setTimeout(function () { host.remove(); }, 250);
+                            clearInterval(iv);
+                        }
+                    }, 700);
+                })();
+            </script>
+            """
+            components.html(countdown_html, height=0)
+            time.sleep(2.4)  # 3 ticks * 0.7s + fade buffer, matches JS timing above
             st.session_state.unlocked = True
             st.rerun()
-        elif password == "":
-            st.warning("Enter a password first.")
         else:
             st.error("That's not it. Try again. 🔐")
 
@@ -247,9 +235,13 @@ if not st.session_state.unlocked:
 # UNLOCKED PAGE
 # ══════════════════════════════════════════════════════════════════════════════
 else:
-    st.balloons()
-
-    # ── music ──
+    # ── music: user-gesture autoplay fallback ──
+    # Browsers block <audio autoplay> without a prior user interaction. The
+    # password submit just above IS that interaction, but the new page render
+    # happens after a rerun, so some browsers still block it. The hidden
+    # "Open Your Gift" click already counts as a gesture for most browsers;
+    # this script also tries .play() directly and silently no-ops if blocked
+    # rather than leaving a broken/noisy player.
     BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
     audio_path = os.path.join(BASE_DIR, "birthday.mp3")
 
@@ -258,37 +250,67 @@ else:
             audio_base64 = base64.b64encode(f.read()).decode()
         st.markdown(
             f"""
-            <audio autoplay loop style="display:none;">
+            <audio id="bday-audio" autoplay loop style="display:none;">
                 <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
             </audio>
+            <script>
+                var a = document.getElementById('bday-audio');
+                if (a) {{ a.play().catch(function() {{ /* autoplay blocked, ignore */ }}); }}
+            </script>
             """,
             unsafe_allow_html=True,
         )
 
-    # ── headline: CSS typewriter (smooth + reliable, plays once) ──
+    st.balloons()
+
+    # ── headline: real character-by-character typewriter (plays once) ──
     title_text = f"Happy Birthday, {FRIEND_NAME}! 🎂"
-    n_chars = len(title_text) + 2  # +2 buffer so emoji/wide glyphs don't clip
 
     if not st.session_state.typed:
-        st.markdown(
-            f"""
-            <div class="bday-headline-wrap">
-                <style>.bday-headline.typewriter {{ --final-width: {n_chars}ch; }}</style>
-                <span class="bday-headline typewriter">{title_text}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        typewriter_html = f"""
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+            html, body {{ margin:0; padding:0; background:transparent; overflow:hidden; }}
+            #tw-line {{
+                font-family:'Playfair Display', serif;
+                font-weight:700;
+                font-size: clamp(1.8rem, 6.5vw, 2.6rem);
+                color:#2C2416;
+                text-align:center;
+                white-space:nowrap;
+            }}
+            #tw-cursor {{
+                display:inline-block;
+                border-right: 0.08em solid #C9A96E;
+                margin-left: 1px;
+                animation: blink 0.75s step-end infinite;
+            }}
+            @keyframes blink {{
+                from, to {{ border-color: transparent; }}
+                50%      {{ border-color: #C9A96E; }}
+            }}
+        </style>
+        <div id="tw-line"><span id="tw-text"></span><span id="tw-cursor">&nbsp;</span></div>
+        <script>
+            var text = {title_text!r};
+            var i = 0;
+            var el = document.getElementById('tw-text');
+            (function typeNext() {{
+                if (i < text.length) {{
+                    el.textContent += text.charAt(i);
+                    i += 1;
+                    setTimeout(typeNext, 65);
+                }} else {{
+                    var cur = document.getElementById('tw-cursor');
+                    if (cur) cur.style.display = 'none';
+                }}
+            }})();
+        </script>
+        """
+        components.html(typewriter_html, height=70)
         st.session_state.typed = True
     else:
-        st.markdown(
-            f"""
-            <div class="bday-headline-wrap">
-                <span class="bday-headline static-text">{title_text}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<p class="bday-headline">{title_text}</p>', unsafe_allow_html=True)
 
     st.markdown('<p class="bday-sub">A little something made just for you</p>', unsafe_allow_html=True)
     st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
@@ -313,10 +335,8 @@ else:
     # ── secret letter button ──
     if not st.session_state.letter_opened:
         if st.button("💌 Open the Secret Letter"):
-            st.session_state.show_letter   = True
             st.session_state.letter_opened = True
             st.rerun()
-
     else:
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
 
@@ -333,7 +353,6 @@ else:
 
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
         st.markdown(
-            '<p style="text-align:center; color:#7A6A55; font-size:0.9rem;">coded by atif with lots of love 🤍</p>',
+            '<p class="signoff">coded by atif with lots of love 🤍</p>',
             unsafe_allow_html=True,
-
         )
