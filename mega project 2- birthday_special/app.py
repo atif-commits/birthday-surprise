@@ -13,9 +13,13 @@ st.set_page_config(
 )
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
-FRIEND_NAME  = "Subhan"
-CORRECT_PASS = "2106"
-SECRET_LETTER = """
+# Each password unlocks its own friend profile: a display name and a fully
+# separate secret letter. Add/remove people by adding/removing dict entries —
+# nothing else in the file needs to change.
+PROFILES = {
+    "2307": {
+        "name": "subhan",
+        "letter": """
 You've been one of the most genuine people I've ever met.
 The kind of person who shows up, who listens, who makes everything
 feel a little lighter just by being there.
@@ -24,7 +28,43 @@ This year I hope you get everything you deserve —
 which is honestly quite a lot.
 
 Happy Birthday.
-"""
+""",
+    },
+    "1607": {
+        "name": "Bhabi",
+        "letter": """
+You bring so much warmth into the family in ways that
+sometimes go unnoticed but never go unfelt.
+
+The little things you do, the way you take care of
+everyone around you, the patience you show even on the
+busiest days. It doesn't go unappreciated.
+
+I hope today, just for once, the care flows back to you.
+You deserve to be celebrated, not just on this day,
+but always.
+
+Happy Birthday, Bhabi.
+""",
+    },
+    "2007": {
+        "name": "5 footiya",
+        "letter": """
+Growing up together means you've seen every version of me,
+And somehow you still stuck around for all of them.
+ 
+There's something about family like you — the teasing,
+the inside jokes nobody else gets, the comfort of
+knowing you're always just a call away.
+ 
+I hope this year treats you the way you deserve 
+full of small joys, good people, and everything
+You've been working towards.
+ 
+Happy Birthday, 5 footiya!!!. 😄
+""",
+    },
+}
 
 # ── GLOBAL STYLES ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -154,9 +194,10 @@ div[data-testid="stAlert"] {
 """, unsafe_allow_html=True)
 
 # ── SESSION STATE ──────────────────────────────────────────────────────────────
-if "unlocked"      not in st.session_state: st.session_state.unlocked      = False
-if "letter_opened" not in st.session_state: st.session_state.letter_opened = False
-if "typed"         not in st.session_state: st.session_state.typed         = False
+if "unlocked"       not in st.session_state: st.session_state.unlocked       = False
+if "letter_opened"  not in st.session_state: st.session_state.letter_opened  = False
+if "typed"          not in st.session_state: st.session_state.typed          = False
+if "active_profile" not in st.session_state: st.session_state.active_profile = None
 
 # ══════════════════════════════════════════════════════════════════════════════
 # LOCKED PAGE
@@ -188,7 +229,8 @@ if not st.session_state.unlocked:
     if submitted:
         if password == "":
             st.warning("Enter a password first.")
-        elif password == CORRECT_PASS:
+        elif password in PROFILES:
+            st.session_state.active_profile = password
             countdown_html = """
             <div id="cd-root" style="position:fixed; inset:0; z-index:999999;
                  display:flex; align-items:center; justify-content:center;
@@ -288,7 +330,8 @@ else:
     st.balloons()
 
     # ── headline: real character-by-character typewriter (plays once) ──
-    title_text = f"Happy Birthday, {FRIEND_NAME}! 🎂"
+    profile = PROFILES[st.session_state.active_profile]
+    title_text = f"Happy Birthday, {profile['name']}! 🎂"
 
     if not st.session_state.typed:
         typewriter_html = f"""
@@ -371,7 +414,7 @@ else:
             unsafe_allow_html=True,
         )
         st.markdown(
-            f'<p class="letter-body">{SECRET_LETTER.strip()}</p>',
+            f'<p class="letter-body">{profile["letter"].strip()}</p>',
             unsafe_allow_html=True,
         )
 
