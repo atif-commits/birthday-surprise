@@ -17,7 +17,7 @@ st.set_page_config(
 # separate secret letter. Add/remove people by adding/removing dict entries —
 # nothing else in the file needs to change.
 PROFILES = {
-    "2106": {
+    "2307": {
         "name": "subhan",
         "letter": """
 You've been one of the most genuine people I've ever met.
@@ -30,15 +30,15 @@ which is honestly quite a lot.
 Happy Birthday.
 """,
     },
-    "1607": {
+    "CHANGE_ME_2": {
         "name": "Bhabi",
         "letter": """
-You bring so much warmth into the family in ways that
+You bring so much warmth into the family, in ways that
 sometimes go unnoticed but never go unfelt.
 
 The little things you do, the way you take care of
 everyone around you, the patience you show even on the
-busiest days. It doesn't go unappreciated.
+busiest days — it doesn't go unappreciated.
 
 I hope today, just for once, the care flows back to you.
 You deserve to be celebrated, not just on this day,
@@ -47,21 +47,21 @@ but always.
 Happy Birthday, Bhabi.
 """,
     },
-    "2007": {
+    "CHANGE_ME_3": {
         "name": "5 footiya",
         "letter": """
 Growing up together means you've seen every version of me,
-And somehow you still stuck around for all of them.
- 
+and somehow you still stuck around for all of them.
+
 There's something about family like you — the teasing,
 the inside jokes nobody else gets, the comfort of
 knowing you're always just a call away.
- 
-I hope this year treats you the way you deserve 
+
+I hope this year treats you the way you deserve —
 full of small joys, good people, and everything
-You've been working towards.
- 
-Happy Birthday, 5 footiya!!!. 😄
+you've been working towards.
+
+Happy Birthday, chhoti si shaitaan. 😄
 """,
     },
 }
@@ -161,7 +161,6 @@ div[data-testid="stAlert"] {
     font-size: 1.08rem;
     color: #2C2416;
     line-height: 1.85;
-    white-space: pre-line;
     text-align: center;
 }
 .bday-headline {
@@ -408,13 +407,24 @@ else:
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
 
         st.markdown(
-            '<p style="color:#1a1918; font-size:0.75rem; letter-spacing:0.12em;'
+            '<p style="color:#7A6A55; font-size:0.75rem; letter-spacing:0.12em;'
             'text-transform:uppercase; text-align:center; margin-bottom:1rem;">'
             '💌 Just between us</p>',
             unsafe_allow_html=True,
         )
+        # Convert plain newlines into explicit <br> tags before rendering.
+        # Relying on CSS `white-space: pre-line` to preserve blank-line
+        # paragraph breaks inside a raw multi-line f-string was the actual
+        # bug here — depending on the Streamlit/markdown-sanitizer version,
+        # content after the first blank line could get parsed unreliably,
+        # which is what made everything past the first paragraph effectively
+        # disappear (no color override anywhere in the CSS was the cause;
+        # it never had a real color, the parser just wasn't rendering it).
+        # Building explicit <br><br> breaks removes that ambiguity entirely
+        # — every line is now a guaranteed, individually-rendered HTML node.
+        letter_html = profile["letter"].strip().replace("\n\n", "<br><br>").replace("\n", "<br>")
         st.markdown(
-            f'<p class="letter-body">{profile["letter"].strip()}</p>',
+            f'<p class="letter-body">{letter_html}</p>',
             unsafe_allow_html=True,
         )
 
