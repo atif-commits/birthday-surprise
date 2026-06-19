@@ -17,41 +17,41 @@ st.set_page_config(
 # separate secret letter. Add/remove people by adding/removing dict entries —
 # nothing else in the file needs to change.
 PROFILES = {
-    "2307": {
+    "2106": {
         "name": "subhan",
         "letter": """
 You've been one of the most genuine people I've ever met.
 The kind of person who shows up, who listens, who makes everything
 feel a little lighter just by being there.
 
-This year I hope you get everything you deserve —
+This year, I hope you get everything you deserve —
 which is honestly quite a lot.
 
-Happy Birthday.
+Happy Birthday. 🎂
 """,
     },
-    "CHANGE_ME_2": {
+    "1607": {
         "name": "Bhabi",
         "letter": """
-You bring so much warmth into the family, in ways that
+You bring so much warmth into the family in ways that
 sometimes go unnoticed but never go unfelt.
 
 The little things you do, the way you take care of
-everyone around you, the patience you show even on the
+everyone around you, the patience you show, even on the
 busiest days — it doesn't go unappreciated.
 
 I hope today, just for once, the care flows back to you.
 You deserve to be celebrated, not just on this day,
 but always.
 
-Happy Birthday, Bhabi.
+Happy Birthday, Bhabi.🎂
 """,
     },
-    "CHANGE_ME_3": {
+    "2007": {
         "name": "5 footiya",
         "letter": """
 Growing up together means you've seen every version of me,
-and somehow you still stuck around for all of them.
+And somehow you still stuck around for all of them.
 
 There's something about family like you — the teasing,
 the inside jokes nobody else gets, the comfort of
@@ -59,9 +59,9 @@ knowing you're always just a call away.
 
 I hope this year treats you the way you deserve —
 full of small joys, good people, and everything
-you've been working towards.
+You've been working towards.
 
-Happy Birthday, chhoti si shaitaan. 😄
+Happy Birthday, 5 Footiyaa!!!. 😄
 """,
     },
 }
