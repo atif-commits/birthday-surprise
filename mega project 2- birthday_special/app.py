@@ -408,7 +408,7 @@ else:
         st.markdown('<hr class="gold-rule">', unsafe_allow_html=True)
 
         st.markdown(
-            '<p style="color:#7A6A55; font-size:0.75rem; letter-spacing:0.12em;'
+            '<p style="color:#1a1918; font-size:0.75rem; letter-spacing:0.12em;'
             'text-transform:uppercase; text-align:center; margin-bottom:1rem;">'
             '💌 Just between us</p>',
             unsafe_allow_html=True,
